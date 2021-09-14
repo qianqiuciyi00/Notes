@@ -1,0 +1,5 @@
+- Image preview
+- Volar
+- Live Server
+- REST Client  (接口请求)
+- Auto Rename Tag
