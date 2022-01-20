@@ -4,3 +4,5 @@
 - REST Client  (接口请求)
 - Auto Rename Tag
 - Git graph
+- Time Master
+- Git Lens
