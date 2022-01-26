@@ -6,3 +6,6 @@
 - Git graph
 - Time Master
 - Git Lens
+- vscode background
+- weixin read
+- 前端每日一题
