@@ -127,3 +127,30 @@ Vue.$set(obj, key), Vue.$delete(obj, key)
 ```js
 this.$options.data().xxx
 ```
+
+# Vue-router原理
+- hash模式
+  hash指的是url描点，当描点发生变化的时候，浏览器只会修改访问历史记录，不会访问服务器重新获取页面。因此可以监听描点值的变化，根据描点值渲染指定dom
+  实现原理：
+  - 改变描点：通过`locaton.hash = '/hashpath'`的方式修改浏览器的hash值
+  - 监听描点变化：
+    ```js
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.substr(1)
+    })
+    ```
+- history模式
+  实现原理：
+  - 改变url：H5的history对象提供了pushState和replaceState两个方法，当调用这两个方法时，url发生变化，浏览器访问历史也会发生变化，但是浏览器不会向后台发送请求
+  ```
+  history.pushState({}, "", '/a')
+  // 第一个参数：data对象，在监听变化的事件中能够获取到
+  // 第二个参数：title标题
+  // 第三个参数：跳转地址
+  ```
+  - 监听url变化：可以通过监听popstate事件监听history变化，也就是点击浏览器的前进或者后退功能时触发
+  ```js
+  window.addEventListener('popstate', () => {
+    const path = window.location.pathname
+  })
+  ```
