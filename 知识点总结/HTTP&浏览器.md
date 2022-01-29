@@ -16,3 +16,41 @@
     2.**Strict**：浏览器将只在访问相同站点时发送cookie
     3.**Lax**：与**Strict**类似，但用户从外部站点导航至URL时除外（例如通过连接）。在新版本浏览器中为默认选项。
   
+# 缓存
+- 概述
+良好的缓存策略可以降低资源的重复加载挺高王爷的整体加载速度，通常浏览器缓存策略分为两种：强缓存和协商缓存
+1、基本原理
+ - 浏览器在加载资源时，根据请求头的`expires`和`cache-control`判断是否命中强缓存，是则直接从缓存读取资源，不会发送请求到服务器
+ - 如果没有命中强缓存，浏览器一定会发送一个请求到服务器，通过`last-modified`和`etag`验证资源是否命中协商缓存，如果命中，服务器会将这个请求返回，但是不会返回这个资源的数据，依然从缓存中读取资源
+ - 如果前两者都没有命中，直接从服务器加载资源
+2、相同点
+如果命中，都是从客户端缓存中加载资源，而不是从服务器加载资源数据
+3、不同点
+强缓存不发送请求到服务器，协商缓存会发请求到服务器
+- 强缓存
+通过**Expires**和**Cache-Control**两种响应头实现
+1、Expires
+Expires是http1.0提出的一个表示资源过期时间的header，它描述的是一个绝对时间，由服务器返回。Expires受限于本地时间，如果修改了本地时间，可能会造成缓存失败
+2、Cache-Control
+出现于http/1.1，优先级高于Expires，表示的是相对时间
+```
+Cache-Control:max-age=31350000
+```
+`Cache-control:no-store`：不缓存数据到本地
+`Cache-Control:public`：可以被所有用户缓存（多用户共享），包括终端和CDN等中间代理服务器
+`Cache-Control:private`：只能被终端浏览器缓存（而且是私有缓存），不允许中间缓存服务器进行缓存
+- 协商缓存
+如果命中协商缓存则请求响应返回的http状态码为304并且会显示一个Not Modified的字符串
+协商缓存是利用`【Last-Modified,If-Modified-Since】`和`【ETag,If-None-Match】`这两对header来管理的
+1、Last-Modified，If-Modified-Since
+`Last-Modified`表示本地文件最后修改日期，浏览器会在request header加上`If-Modified-Since`（删除给i返回的`Last-Modified`）的值，询问服务器在该日期后资源是否有更新，有更新的话就会将新的资源发送回来
+但是如果在本地打开缓存文件，就会造成Last-Modified被修改，所以出现了ETag
+2、ETag, If-None-Match
+`ETag`就像一个指纹，资源变化都会导致ETag变化，跟最后修改时间没有关系，`ETag`可以保证每一个资源是唯一的
+`If-None-Match`的header会将上次返回的`ETag`发送给服务器，询问该资源的`ETag`是否有更新，有变动就会发送新的资源回来
+`ETag`的优先级比`Last-Modified`高，使用`ETag`的原因：
+  - 一些文件也许会周期性的更改，但是它的内容并不改变，这个时候我们并不希望客户端认为这个文件被修改了，而重新获取
+  - 某些文件修改非常频繁，If-Modified-Since能见查到的粒度是s级的，这种修改无法判断
+  - 某些服务器不能精确的得到文件的最后修改时间
+- 整体流程图
+![RUNOOB 图标](https://user-images.githubusercontent.com/25027560/38223505-d8ab53da-371d-11e8-9263-79814b6971a5.png)
