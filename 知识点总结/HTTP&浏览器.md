@@ -17,6 +17,7 @@
     3.**Lax**：与**Strict**类似，但用户从外部站点导航至URL时除外（例如通过连接）。在新版本浏览器中为默认选项。
   
 # 缓存
+
 - 概述
 良好的缓存策略可以降低资源的重复加载挺高王爷的整体加载速度，通常浏览器缓存策略分为两种：强缓存和协商缓存
 1、基本原理
@@ -27,6 +28,7 @@
 如果命中，都是从客户端缓存中加载资源，而不是从服务器加载资源数据
 3、不同点
 强缓存不发送请求到服务器，协商缓存会发请求到服务器
+
 - 强缓存
 通过**Expires**和**Cache-Control**两种响应头实现
 1、Expires
@@ -39,6 +41,7 @@ Cache-Control:max-age=31350000
 `Cache-control:no-store`：不缓存数据到本地
 `Cache-Control:public`：可以被所有用户缓存（多用户共享），包括终端和CDN等中间代理服务器
 `Cache-Control:private`：只能被终端浏览器缓存（而且是私有缓存），不允许中间缓存服务器进行缓存
+
 - 协商缓存
 如果命中协商缓存则请求响应返回的http状态码为304并且会显示一个Not Modified的字符串
 协商缓存是利用`【Last-Modified,If-Modified-Since】`和`【ETag,If-None-Match】`这两对header来管理的
@@ -52,5 +55,19 @@ Cache-Control:max-age=31350000
   - 一些文件也许会周期性的更改，但是它的内容并不改变，这个时候我们并不希望客户端认为这个文件被修改了，而重新获取
   - 某些文件修改非常频繁，If-Modified-Since能见查到的粒度是s级的，这种修改无法判断
   - 某些服务器不能精确的得到文件的最后修改时间
+
 - 整体流程图
 ![RUNOOB 图标](https://user-images.githubusercontent.com/25027560/38223505-d8ab53da-371d-11e8-9263-79814b6971a5.png)
+
+- 几种状态码的区别
+  - 200：强缓存Expires/Cache-COntrol失效时，返回新的资源文件
+  - 200(from cache)：强缓存Expires/Cache-control两者都存在，未过期，Cache-Control优先Expires时，浏览器从本地获取资源成功
+  - 304(Not Modified)：协商缓存Last-Modified/ETag没有过期时，服务端返回状态码304
+注：现在的200(form cache)变成了from disk cache(磁盘缓存)和from memory cache(内存缓存)两种
+
+# HTTP协议特点
+- 支持客户/服务器模式
+- 简单快速：客户端向服务器请求服务时，只需传动请求方式和路径
+- 灵活：HTTP允许传输任意类型的数据对象
+- 无连接：限制每次连接只处理一个请求，服务器处理完客户端的请求，并受到客户端的应答后，即断开连接，采用这种方式可以节省传输时间
+- 无状态：协议对于事务处理没有记忆能力
