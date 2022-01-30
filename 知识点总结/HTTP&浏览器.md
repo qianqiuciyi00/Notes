@@ -1,13 +1,13 @@
-# cookie
+# Cookie
 - 设置：Set-Cookie
 - 生命周期：  
   1.会话期Cookie：浏览器关闭之后会自动删除，仅在会话期内有效。不需要指定过期时间（Expires）或有效期（Max-Age）。但是有些浏览器提供了会话恢复功能，这种情况下即使关闭了浏览器，会话期Cookie也会被保留下来，就好像浏览器从来没有关闭一样，这会导致Cookie的生命周期无限延长  
   2.持久性Cookie的生命周期取决于过期时间和有效期指定的一段时间
-- 限制访问Cookie
+- 限制访问Cookie  
   有两种方法可以确保Cookie被安全发送，并且不会被意外的参与者或脚本访问：Secure属性和HttpOnly属性
   - 标记Secure的cookie只应通过被HTTPS协议加密过的请求发送给服务端
   - JavaScript`Document.cookie`API无法访问带有HttpOnly属性的cookie，此类cookie仅作用于服务器。此预防措施有助于缓解跨站脚本攻击(XSS)
-- Cookie的作用域
+- Cookie的作用域  
   Domain和Path标识定义了COokie的作用域：即允许Cookie应该发送给哪些URL
   - Domain: 指定了哪些主机可以接受cookie，如果不指定，默认为origin，**不包含子域名**。如果指定了Domain，则一般包含子域名
   - Path：指定了主机下的哪些路径可以接受cookie（该URL路径必须存在于请求URL中）。以（"/"）作为路径分隔符，子路径也会被匹配
@@ -17,7 +17,6 @@
     3.**Lax**：与**Strict**类似，但用户从外部站点导航至URL时除外（例如通过连接）。在新版本浏览器中为默认选项。
   
 # 缓存
-
 - 概述  
 良好的缓存策略可以降低资源的重复加载挺高王爷的整体加载速度，通常浏览器缓存策略分为两种：强缓存和协商缓存  
 1、基本原理  
