@@ -129,7 +129,7 @@ this.$options.data().xxx
 ```
 
 # Vue-router原理
-- hash模式
+- hash模式  
   hash指的是url描点，当描点发生变化的时候，浏览器只会修改访问历史记录，不会访问服务器重新获取页面。因此可以监听描点值的变化，根据描点值渲染指定dom
   实现原理：
   - 改变描点：通过`locaton.hash = '/hashpath'`的方式修改浏览器的hash值
@@ -139,7 +139,7 @@ this.$options.data().xxx
       const hash = window.location.hash.substr(1)
     })
     ```
-- history模式
+- history模式  
   实现原理：
   - 改变url：H5的history对象提供了pushState和replaceState两个方法，当调用这两个方法时，url发生变化，浏览器访问历史也会发生变化，但是浏览器不会向后台发送请求
   ```
