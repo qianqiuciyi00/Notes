@@ -7,6 +7,15 @@
     })
   ```
 
+# DOMContentLoaded和Load
+DOM 文档的加载步骤：
+1、解析HTML结构
+2、加载外部脚本和样式表文件
+3、解析并执行脚本代码 // 部分脚本会阻塞页面的加载
+4、DOM树构建完成 // DOMContentLoaded事件触发
+5、加载图片等外部文件
+6、页面加载完毕  // Load事件触发
+
 # 异步脚本
 - async 或defer
   当HTML文档被解析时如果遇见同步脚本，则停止解析，先去加载脚本，然后执行，执行结束后继续解析HTML文档。
@@ -101,3 +110,25 @@ Object.is(val1, val2)
 - for of： 主要便利可迭代的对象（Array, Map, Set, argument等）用来获取对象的属性值，返回属性值
 - Object.keys()：遍历对象所有可枚举属性，不包括原型链上的属性，返回一个数组（数组，对象）
 - Object.getPropertyNames()：返回除原型属性以外的所有属性（包括不可枚举属性）名组成的数组（数组，对象）
+
+# 内部属性[[class]]
+所有的typeof 返回值为 object 的对象（如数组）都包含一个内部属性`[[class]]`（我们可以把它看作一个内部的分类，而非传统的面向对象意义上的类）。这个属性无法直接访问，一般通过`Object.prototype.toString(...)`来查看。例如：
+```js
+Object.prototype.toString.call([1,2,3])
+// "[object Array]"
+
+Object.prototype.toString.call( /regex-literal/i )
+// "[object RegExp]"
+
+// 我们自己创建的类就不会有这份特殊待遇，因为toString()找不到toStringTag属性时只好返回默认的Object标签
+// 默认情况类的[[class]]返回[object Object]
+class Class1 {}
+Object.prototype.toString.call(new Class1())  // "[object Object]"
+// 需要定制[[class]]
+class Class2 {
+  get [Symbol.toStringTag]() {
+    return "class2"
+  }
+}
+Object.prototype.toString.call(new Class2())  // "[object Class2]"
+```
