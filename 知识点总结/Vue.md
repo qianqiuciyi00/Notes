@@ -154,3 +154,15 @@ this.$options.data().xxx
     const path = window.location.pathname
   })
   ```
+
+# Vue-Router导航狗子
+- 全局守卫
+  - router.beforeEach((to, from, next) => {})
+  - router.beforeResolve
+  - router.afterEach((to, from) => {})
+- 路由独享守卫
+  - beforeEnter((to, from, next) => {})  //路由配置中使用
+- 组件内守卫
+  - beforeRouteEnter(to, from, next) {}
+  - beforeRouteUpdate(to, from, next)
+  - beforeRouteLeave(to, from, next)
