@@ -152,3 +152,22 @@ Object.prototype.toString.call(new Class2())  // "[object Class2]"
   - 里氏替换原则：**子类可以替换父类并且出现在父类能够出现的任何地方，贯彻GOF倡导的面向接口编程**
   - 依赖倒置原则：**传统的结构化编程中，最上层的模块通常都要依赖下面的子模块来实现，也成为最高层依赖低层**，所以依赖倒置原则就是要逆转这种依赖，让高层模块不要依赖低层模块
   - ISP接口隔离原则：**使用多个专门的接口比使用单个接口要好得多**
+
+# Symbol.toPrimitive
+Symbol.toPrimitive 是一个内置的 Symbol 值，它是作为对象的函数值属性存在的，当一个对象转换为对应的原始值时，会调用此函数。  
+该函数被调用时，会被传递一个字符串参数 hint ，表示要转换到的原始值的预期类型。 hint 参数的取值是 "number"、"string" 和 "default" 中的任意一个。  
+此⽅法在转基本类型时调⽤优先级最⾼
+```js
+let a = {
+valueOf() {
+return 0;
+ },
+toString() {
+return '1';
+ },
+ [Symbol.toPrimitive]() {
+return 2;
+ }
+}1 + a // => 3
+'1' + a // => '12'
+```
