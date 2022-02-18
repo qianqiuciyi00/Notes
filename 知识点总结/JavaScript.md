@@ -1,3 +1,109 @@
+# JSON.stringify
+- JSON.stringify的一些特性 
+对于undefined、任意函数以及symbol三个特殊的值分别作为对象属性的值、数组元素、单独的值时，JSON.stringify()将返回不同的结果  
+  - undefined、任意函数以及symbol作为对象属性值时，JSON.stringify将跳过对他们进行序列化
+  ```js
+  const data = {
+    a: 'a',
+    b: undefined,
+    c: Symbol('c'),
+    fn: function() {
+      return 'fn'
+    }
+  }
+  JSON.stringify(data)  // {a: a}
+  ```
+  - 作为数组元素时，会将他们序列化为null
+  ```js
+  JSON.stringify([
+    'a',
+    undefined,
+    function fn() {
+      return 'fn'
+    },
+    Symbol('c')
+  ])
+  // "["a", null, null, null]"
+  ```
+  - 作为单独的值进行序列化时都会返回undefined
+  ```js
+  JSON.stringify(function a() {
+    console.log('a')
+  })
+  // undefined
+  JSON.stringify(undefined)  // undefined
+  JSON.stringify(Symbol('c'))  // undefined
+  ```
+  非数组对象的属性不能保证以特定的顺序出现在序列化后的字符串中
+  ```js
+  const data = {
+    a: 'a',
+    b: undefined,
+    c: Symbol("c"),
+    fn:function (){
+        return "fn";
+    },
+    d: "d",
+};
+JSON.stringify(data);
+// "{"a": "a", "d":"d"}"
+ 
+JSON.stringify([
+    "a",
+    undefined,
+    function fn(){
+        return "fn"
+    },
+    Symbol("c"),
+    (d: "d"),
+]);
+```
+z转换值时如果有to.JSON()函数，该函数返回什么值，序列化结果就是什么值，并且忽略其他属性的值
+```js
+JSON.stringify({
+    str: "str",
+    toJSON: function () {
+        return "strToJson";
+    },
+});
+// "strToJson"
+```
+JSON.stringify()将会正常序列化Date的值
+```js
+JSON.stringify({now: new Date()});
+```
+实际上Date对象自己部署了toJSON()方法，因此Date对象会被当做字符串处理  
+
+NaN和infinity格式的数值及null都会被当作null
+```js
+JSON.stringify(NaN);
+// "null"
+JSON.stringify(null);
+// "null"
+JSON.stringify(Infinity);
+// "null"
+```
+b布尔值、数字、字符串的包装对象在序列化过程中会自动转化成对应的原始值
+```js
+JSON.stringify([new Number(1), new String("false"), new Boolean(false)]);
+// "[1,"false",false]"
+```
+其它类型的对象，包括Map/Set/WeakMap/WeakSet，仅会序列化可枚举的属性
+```js
+JSON.stringify(
+  Object.create(null, {
+    x: { value: 'json', enumerable: false },
+    y: { value: 'stringify', enumerable: true },
+  })
+)
+// "{"y": "stringify"}"
+```
+实现深拷贝最简单粗暴的方法就是序列化：JSON.parse(JSON.stringify(obj))，这个方式实现深拷贝会因为序列化的诸多特性从而导致诸多的坑点：比如循环引用的问题  
+BigInt的值会抛出TypeError（不能序列化）  
+
+- JSON.stringify第二个参数replacer  
+第二个参数可以是一个函数或者一个数组。作为函数时，它有两个参数，key和value，函数类似就是数组的方法吗，map、filter等方法的回调函数，对每一个属性值都会执行一次该函数。如果是一个数组，数组的值代表就会被序列化成JSON字符串的属性名
+
 # DOMContentLoaded
 - 当初始的HTML文档被完全加载和解析完成之后，DOMContentLoaded事件被触发，而无需等待样式表、图像和子框架的完全加载。如果文档中包含脚本，则脚本会阻塞文档的解析，而脚本需要等待CSSDOM构建完成才能执行。在任何情况下，DOMContentLoaded的触发不需要等待图片等其他资源加载完成。
 - 使用
