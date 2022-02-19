@@ -1,3 +1,90 @@
+# MessageChannel
+MessageChannel允许创建一个新的消息通道，并通过它的两个`MessagePort`属性发送数据。属于**宏任务**。
+用法：  
+```js
+var channel = new MessageChannel()
+
+// 实例属性，只读。两个端口都可以通过postMessage发送数据，而一个端口只要绑定了onmessage回调方法，就可以接收从另一端口传过来的数据
+var port1 = channel.port1
+var port2 = channel.port2
+port1.onmesssge = function(event) {
+  console.log('port1接收到来自port2的数据：' + event.data)
+}
+port2.onmesssge = function(event) {
+  console.log('port2接收到来自port1的数据：' + event.data)
+}
+port1.postMessage('发送给port2')
+port2.postMessage('发送给port1')
+```
+- 用于深拷贝  
+  `postMessage`传递的数据也是深拷贝的，也可以深拷贝`undefined`和循环引用的对象，但拷贝有函数时，会报错
+  ```js
+  // 有undefined + 循环引用
+    let obj = {
+      a: 1,
+      b: {
+        c: 2,
+        d: 3,
+      },
+      f: undefined
+    }
+    obj.c = obj.b;
+    obj.e = obj.a
+    obj.b.c = obj.c
+    obj.b.d = obj.b
+    obj.b.e = obj.b.c
+
+    function deepCopy(obj) {
+      return new Promise((resolve) => {
+        const {port1, port2} = new MessageChannel();
+        port2.onmessage = ev => resolve(ev.data);
+        port1.postMessage(obj);
+      });
+    }
+
+    deepCopy(obj).then((copy) => {           // 请记住`MessageChannel`是异步的这个前提！
+        let copyObj = copy;
+        console.log(copyObj, obj)
+        console.log(copyObj == obj)
+    });
+  ```
+- 在web Worker中使用  
+  当我们使用多个`web worker`并想要在两个`web worker`之间实现通信的时候，`MessageChannel`也可以派上用场
+  ```js
+  let worker1 = new Worker('./worker1.js');
+let worker2 = new Worker('./worker2.js');
+let ms = new MessageChannel();
+
+// 把 port1 分配给 worker1
+worker1.postMessage('main', [ms.port1]);
+// 把 port2 分配给 worker2
+worker2.postMessage('main', [ms.port2]);
+
+//worker1.js
+self.onmessage = function(e) {
+    console.log('worker1', e.ports);
+    if (e.data === 'main') {
+        const port = e.ports[0];
+        port.postMessage(`worker1: Hi! I'm worker1`);
+        port.onmessage = function(ev){
+            console.log('reveice: ',ev.data,ev.origin);
+        }
+    }       
+}
+
+//worker2.js
+self.onmessage = function(e) {
+    if (e.data === 'main') {
+        const port = e.ports[0];
+        port.onmessage = function(e) {
+            console.log('receive: ', e.data);
+            port.postMessage('worker2: ' + e.data);
+        }
+    }
+}
+  ```
+
+
 # JSON.stringify
 - JSON.stringify的一些特性 
 对于undefined、任意函数以及symbol三个特殊的值分别作为对象属性的值、数组元素、单独的值时，JSON.stringify()将返回不同的结果  
