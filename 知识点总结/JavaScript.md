@@ -1,3 +1,95 @@
+# 性能优化
+- DNS预解析
+- 缓存：强缓存、协商缓存
+- 预加载
+- 预渲染
+- 优化渲染过程
+  - 懒执行
+  - 懒加载
+- 文件优化
+  - 图片优化
+- CDN
+- webpack优化项目
+  - 打包项目使用production模式，自动开启代码压缩
+  - 使用es6模块来开启tree shaking，这个技术可以移除没有使用的代码
+  - 按照路由拆分代码，实现按需加载
+  - 给打包出来的文件名添加哈希，实现浏览器缓存文件
+# 跨域
+- JSONP  
+  原理：利用`<script>`标签没有跨域限制的漏洞。通过`<script>`标签指向一个需要访问的地址并提供一个回调函数来接收数据。只限于get请求
+- CORS  
+- document.domain  
+  该方式只能用于二级域名相同的情况下，比如`a.test.com`和`b.test.com` 。只需要给页面添加`document.domain = 'test.com'`表示二级域名都相同就可以实现跨域
+- postMessage  
+  这种方式通常用于获取嵌入页面中的第三方页面数据。一个页面发送数据，另一个页面判断来源并接收消息  
+  任何窗口可以在任何其他窗口访问此方法，在任何时间，无论文档在窗口中的位置，向其发送消息。因此，用于接收消息的任何事件监听器必须首先使用origin和source属性来检查消息的发送者身份。**这不能低估：无法检查origin和source属性会导致跨站脚本攻击**
+
+# 事件机制
+事件触发三个阶段：  
+- windiw往事件触发处传播，捕获事件
+- 传播到事件触发处触发注册的时间，目标阶段
+- 从事件触发处往window传播，冒泡事件  
+事件触发一般会按照上面的顺序进行，但是也有特例，如果给一个目标节点同时注册冒泡和捕获事件，事件触发会按照注册的顺序执行
+```js
+// 以下会先打印冒泡然后是捕获
+node.addEventListener('click',(event) =>{
+console.log('冒泡')
+},false);
+node.addEventListener('click',(event) =>{
+console.log('捕获 ')
+},true)
+```
+**注册事件**  
+通常我们使用`addEventListener`注册事件，该函数的第三个参数可以是布尔值，也可以是对象。对于布尔值`useCapture`参数来说，该函数默认值为false，表示冒泡事件。为true则是捕获事件。对于对象参数来说，可以使用以下几个属性：  
+- capture：布尔值，和`useCapture`作用一样
+- once：布尔值，值为true表示该回调只会调用一次，调用后会移除监听
+- passive：布尔值，表示永远不会调用`preventDefault`.  
+一般来说，可以使用`stopPropagation`来组织事件的进一步传播，可以组织事件冒泡和捕获事件。`stopImmediatePropagation`同样也能实现阻止事件，还能阻止该事件目标执行别的注册事件
+```js
+node.addEventListener('click',(event) =>{
+event.stopImmediatePropagation()
+console.log('冒泡')
+},false);
+// 点击 node 只会执⾏上⾯的函数，该函数不会执⾏
+node.addEventListener('click',(event) => {
+console.log('捕获 ')
+},true)
+```
+# V8下的垃圾回收机制
+V8实现了准确是GC，GC算法采用了分代式垃圾回收机制。因此，v8将内存（堆）分为新生代和老生代两部分。  
+**新生代算法**  
+新生代中的对象一般存活时间较短，使用scanvenge GC算法  
+在新生代空间中，内存空间分为两部分，分别为from空间和to空间。在这两个空间中，必定有一个空间是使用的，另一个空间是空闲的。新分配的对象会被放入from空间中，当from空间被占满时，新生代GC就会启动了。算法会检查from空间中存活的对象并复制到to空间中，如果有失活的对象就会销毁。当复制完成后将from空间和to空间互换，这样GC就结束了。  
+**老生代算法**  
+老生代中的对象一般存活时间较长数量也多，使用了两个算法，分别是标记清除算法和标记压缩算法。  
+什么情况下对象会出现在老生代空间中：  
+- 新生代中的对象是否已经经历过一次Scavenge算法，如果经历过的话，会将对象从新生代空间转移到老生代空间中
+- to空间的对象占比大小超过25%。在这种情况下，为了不影响到内存分配，会将对象从新生代空间移到老生代空间中。  
+老生代有如下几个空间：
+```
+enum AllocationSpace {
+  // TODO(v8:7464): Actually map this space's memory as read-only.
+  RO_SPACE, // 不变的对象空间
+  NEW_SPACE, // 新⽣代⽤于 GC 复制算法的空间
+  OLD_SPACE, // ⽼⽣代常驻对象空间
+  CODE_SPACE, // ⽼⽣代代码对象空间
+  MAP_SPACE, // ⽼⽣代 map 对象
+  LO_SPACE, // ⽼⽣代⼤空间对象
+  NEW_LO_SPACE, // 新⽣代⼤空间对象
+  FIRST_SPACE = RO_SPACE,
+  LAST_SPACE = NEW_LO_SPACE,
+  FIRST_GROWABLE_PAGED_SPACE = OLD_SPACE,
+  LAST_GROWABLE_PAGED_SPACE = MAP_SPACE
+}
+```
+在老生代中，以下情况会先启动标记清除算法：  
+- 某一个空间没有分块的时候
+- 空间中的对象超过一定限制
+- 空间不能保证新生代中的对象移动到老生代中  
+
+在这个阶段中，会遍历堆中所有的对象，然后标记活的对象，在标记完成后，销毁所有没有被标记的对象。在标记大型堆内存时，可能需要几百毫秒才能完成一次标记。这就会导致一些性能上的问题。为了解决这个问题，2011年，v8从stop-the-worle标记切换到增量标记。在增量标记期间，GC将标记工作分解为更小的模块，可以让js应用逻辑在模块间隙执行一会，从而不至于让应用出现停顿情况。在2018年，GC技术又有了一个重大突破，这项技术名为并发标记，这项技术可以让GC扫描和标记对象时，同时允许js运行。  
+清除对象后会造成堆内存出现碎片情况，当碎片超过一定限制后会启动压缩算法，在压缩过程中，过活的对象向一端移动，直到所有对象都转移完成然后清理掉不需要的内存。
+
 # MessageChannel
 MessageChannel允许创建一个新的消息通道，并通过它的两个`MessagePort`属性发送数据。属于**宏任务**。
 用法：  
@@ -52,36 +144,36 @@ port2.postMessage('发送给port1')
   当我们使用多个`web worker`并想要在两个`web worker`之间实现通信的时候，`MessageChannel`也可以派上用场
   ```js
   let worker1 = new Worker('./worker1.js');
-let worker2 = new Worker('./worker2.js');
-let ms = new MessageChannel();
+  let worker2 = new Worker('./worker2.js');
+  let ms = new MessageChannel();
 
-// 把 port1 分配给 worker1
-worker1.postMessage('main', [ms.port1]);
-// 把 port2 分配给 worker2
-worker2.postMessage('main', [ms.port2]);
+  // 把 port1 分配给 worker1
+  worker1.postMessage('main', [ms.port1]);
+  // 把 port2 分配给 worker2
+  worker2.postMessage('main', [ms.port2]);
 
-//worker1.js
-self.onmessage = function(e) {
-    console.log('worker1', e.ports);
-    if (e.data === 'main') {
-        const port = e.ports[0];
-        port.postMessage(`worker1: Hi! I'm worker1`);
-        port.onmessage = function(ev){
-            console.log('reveice: ',ev.data,ev.origin);
-        }
-    }       
-}
+  //worker1.js
+  self.onmessage = function(e) {
+      console.log('worker1', e.ports);
+      if (e.data === 'main') {
+          const port = e.ports[0];
+          port.postMessage(`worker1: Hi! I'm worker1`);
+          port.onmessage = function(ev){
+              console.log('reveice: ',ev.data,ev.origin);
+          }
+      }       
+  }
 
-//worker2.js
-self.onmessage = function(e) {
-    if (e.data === 'main') {
-        const port = e.ports[0];
-        port.onmessage = function(e) {
-            console.log('receive: ', e.data);
-            port.postMessage('worker2: ' + e.data);
-        }
-    }
-}
+  //worker2.js
+  self.onmessage = function(e) {
+      if (e.data === 'main') {
+          const port = e.ports[0];
+          port.onmessage = function(e) {
+              console.log('receive: ', e.data);
+              port.postMessage('worker2: ' + e.data);
+          }
+      }
+  }
   ```
 
 
@@ -145,7 +237,7 @@ JSON.stringify([
     (d: "d"),
 ]);
 ```
-z转换值时如果有to.JSON()函数，该函数返回什么值，序列化结果就是什么值，并且忽略其他属性的值
+在转换值时如果有to.JSON()函数，该函数返回什么值，序列化结果就是什么值，并且忽略其他属性的值
 ```js
 JSON.stringify({
     str: "str",
@@ -170,7 +262,7 @@ JSON.stringify(null);
 JSON.stringify(Infinity);
 // "null"
 ```
-b布尔值、数字、字符串的包装对象在序列化过程中会自动转化成对应的原始值
+布尔值、数字、字符串的包装对象在序列化过程中会自动转化成对应的原始值
 ```js
 JSON.stringify([new Number(1), new String("false"), new Boolean(false)]);
 // "[1,"false",false]"
