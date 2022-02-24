@@ -1,3 +1,16 @@
+# vue.Observable()
+处理简单的跨组件状态共享  
+```js
+export const state = vue.oberservable({
+  data: {}
+})
+export const moutation = {
+  updateData(arg) {
+    state.data = Objec.assign({}, arg)
+  }
+}
+```
+
 # 优缺点
 - 优点：渐进式，组件化，轻量级，虚拟DOM，响应式，单页面路由，数据与视图分开
 - 缺点：单页面不利于SEO，不支持IE8以下，首屏加载时间长
