@@ -456,3 +456,65 @@ return 2;
 }1 + a // => 3
 '1' + a // => '12'
 ```
+
+# 装箱和拆箱
+**装箱：把基本数据类型转化为对应的引用数据类型的操作**  
+```js
+const s1 = 'qianqiu'
+const index = s1.indxOf('a')
+console.log(index) // 2
+```
+s1只是个基本数据类型，他却可以调用valueOf，原因就是JavaScript内部进行了装箱操作
+- 1.创建String类型的一个实例
+- 2.在实例上调用指定的方法
+- 3.销毁这个实例
+```js
+let temp = new String('qianqiu')
+const index = temp.indexOf('a')
+temp = null
+console.log(index) // 8
+```
+**拆箱：将引用数据类型转化为对应的基本数据类型的操作**  
+通过valueOf或toString方法实现拆箱操作
+```js
+var objNum = new Number(123)
+var objStr = new String('123')
+console.log(typeof objNum) // object
+console.log(typeof objStr) // object
+console.log(typeof objNum.valueOf()) // number
+console.log(typeof objStr.valueOf()) // string
+console.log(typeof objNum.toString()) // string
+console.log(typeof objStr.toString()) // string
+```
+
+# 相等运算符==的运算规则
+1.在比较相同类型的数据时，与严格运算符===完全一样  
+2.在比较不同类型的数据时，会先将数据进行类型转换，然后再用严格运算符进行比较。类型转换规则如下：
+  - 原始类型的值：原始类型的数据会转换成数值类型进行比较。
+  - 对象与原始类型值比较：对象转换成原始类型的值再进行比较
+  - undefined和null
+  - 相等运算符==的缺点
+    ```js
+    '' == '0'    //false
+    0 == ''     // true
+    0 == '0'    //true
+    false == 'false'    // false
+    false == '0'    //true
+    false == undefined    //false
+    false == null     // false
+    null == undefined    //true
+    ' \t\r\n ' == 0    //true
+    ```
+    
+    # 函数声明和函数表达式的区别
+    - 函数声明：享受函数提升
+    - 函数表达式：归类于变量声明，享受变量提升
+    - 函数提升优先级 > 变量提升优先级
+    ```js
+    console.log(fun)  // fun(){}
+    // 函数表达式
+    var fun = function(name){}
+    // 函数声明
+    function fun(){}
+    console.log(fun)   // function (name) {}
+    ```
