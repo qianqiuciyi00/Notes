@@ -179,3 +179,13 @@ this.$options.data().xxx
   - beforeRouteEnter(to, from, next) {}
   - beforeRouteUpdate(to, from, next)
   - beforeRouteLeave(to, from, next)
+
+# 生命周期
+- beforeCreate：创建之前，此时还没有data和method
+- Created: 创建完成，此时可以使用data和method。在Created之后beforeMount之前如果没有el选项的话此时生命周期结束，停止编译，如果有则继续
+- beforeMount：在渲染之前
+- mounted: 页面渲染完成，并且vm实例已经添加完$el，已经替换掉那些DOM元素（双括号里面的变量），这时候可以操作DOM了。但是获取不到元素的高度等属性，可以使用nextTick()获取
+- beforeUpdate：date改变后，对应的组件重新渲染之前
+- updated：data改变后，对应的组件重新渲染完成
+- beforeDestory：实例销毁之前，此时实例仍然可以使用
+- destoryed：实例销毁后

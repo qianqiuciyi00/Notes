@@ -50,3 +50,16 @@ web页面的展示一般分为五个步骤：
 - 同一层相邻元素之间：相邻的两个元素之间的外边距重叠，除非后一个元素加上 clear-fix 清除浮动
 - 没有内容将父元素和后代元素分开
 - 空的块级元素
+
+# css优先级
+- !import 无条件优先
+- 内联样式 1000
+- id选择器 100
+- class、伪类、属性 10
+- 标签、伪元素 1
+
+# 标准盒模型和怪异盒模型
+标准盒的总宽度：width+padding+border+margin  
+怪异盒模型总宽度：width+margin（width已经包含了padding和border）  
+box-sizing: content-box  为标准盒模型
+box-sizing: border-box 为怪异盒模型
