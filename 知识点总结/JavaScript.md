@@ -1,3 +1,16 @@
+# 执行栈和执行上下文
+- 执行上下文分为：
+  - 全局执行上下文：创建一个全局的window对象，并规定this指向window，执行js的时候就压入栈底，关闭浏览器的时候才弹出
+  - 函数执行上下文：每次函数调用时，都会新创建一个函数执行上下文。执行上下文分为创建阶段和执行阶段：
+    - 创建阶段：函数环境会创建变量对象：arguments对象（并赋值）、函数声明（并赋值）、变量声明（不赋值），函数表达式声明（不赋值）；会确定this指向，会确定作用域
+    - 执行阶段：变量赋值、函数表达式赋值，使变量对象变成活跃对象
+  - eval执行上下文
+- 执行栈：
+  - 特点：先进后出
+  - 当进入一个执行环境，就会创建出它的执行上下文，然后进行压栈，当程序执行完成时，它的执行上下文就会被摧毁，进行弹栈
+  - 栈底永远是全局环境的执行上下文，栈顶永远是正在执行函数的执行上下文
+  - 只有浏览器关闭的时候全局执行上下文才会弹出
+  
 # 判断数据类型的方法
 - typeof：缺点：null 会判断为object
 - instanceof：只能判断对象是否存在于目标对象的原型链上
@@ -11,6 +24,42 @@
   auto instanceof Car  // true
   auto instance Object  // true
   ```
+- constructor：除了undefined、null，因为他们不属于包装类对象。  
+  数字、字符串、布尔是包装类对象
+  ```js
+  var num = 1
+  num.constructor
+
+  ''.constructor
+
+  true.constructor
+
+  var fun = function() {}
+  fun.constructor
+
+  ```
+- Object.prototype.toString.call()
+  - 最好的检测方式，它可以检测出null、string、boolean、number、undefined、array、function、object、date、math数据类型
+  - 缺点：不能细分为谁谁的实例
+
+# instanceof原理
+实际上就是查找目标对象的原型链
+```js
+function MyInstance(L, R) { 
+  var RP = R.prototype
+  var LP = L.__proto__
+  while (true) {
+    if (LP == null) {
+      return false
+    }
+    if (LP == RP) {
+      return true
+    }
+    LP == LP.__proto__
+  }
+}
+console.log(MyInstance({}, Object))
+```
 
 # Set Map WeakSet WeakMap
 - Set：
