@@ -10,9 +10,9 @@
   - 当进入一个执行环境，就会创建出它的执行上下文，然后进行压栈，当程序执行完成时，它的执行上下文就会被摧毁，进行弹栈
   - 栈底永远是全局环境的执行上下文，栈顶永远是正在执行函数的执行上下文
   - 只有浏览器关闭的时候全局执行上下文才会弹出
-  
+
 # 判断数据类型的方法
-- typeof：缺点：null 会判断为object
+- typeof：缺点：null 会判断为object；对于对象来说，函数会显示function，其他的显示object
 - instanceof：只能判断对象是否存在于目标对象的原型链上
   ```js
   function Car(make, model, year) {
@@ -23,7 +23,11 @@
   const auto = new Car('Honda', 'Accord', 1998)
   auto instanceof Car  // true
   auto instance Object  // true
+
+  2 instanceof Number // false
+  true instanceof Boolean // false
   ```
+  可以精确判断引用数据类型，但不能精确判断基本数据类型
 - constructor：除了undefined、null，因为他们不属于包装类对象。  
   数字、字符串、布尔是包装类对象
   ```js
