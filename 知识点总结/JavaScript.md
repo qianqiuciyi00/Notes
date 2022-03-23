@@ -1,3 +1,19 @@
+# ?? 和 ?.操作符
+- 空值合并操作符??：当操作符左侧为unll或undefined时才会返回右侧的值，否则返回左侧的值。  
+  可以用于当程序中某个值为unll或undefined时给它赋默认值  
+  if 表达式或者逻辑或||操作符也能实现这个赋默认值，区别是：  
+  逻辑或是当操作符左侧为假值（null、undefined、0、false等等）时返回操作符右侧的值，否则返回左侧的值
+- 空值赋值操作符：??=  
+  x ??= y 等价于 x = (x ?? y)
+- 可选链操作符： ?.  
+  用于读取链中的属性值，而不必明确每个值都有效，区别于(.)操作符加了一层异常处理，避免程序的报错和表达式的执行短路
+
+  ```js
+  var obj = {}
+  obj.name = obj?.name?.firstName ?? {firstName: 'hello', lastName: 'world'}
+  obj  // {name: {firstName: 'hello', lastName: 'world'}}
+  ```
+
 # 执行栈和执行上下文
 - 执行上下文分为：
   - 全局执行上下文：创建一个全局的window对象，并规定this指向window，执行js的时候就压入栈底，关闭浏览器的时候才弹出
@@ -605,3 +621,13 @@ console.log(typeof objStr.toString()) // string
     function fun(){}
     console.log(fun)   // function (name) {}
     ```
+
+# promise
+- 三个状态：pending、fulfilled、rejected
+- 静态方法：
+  - all：返回一个新的promise对象，该对象在参数对象里面的所有promise对象都成功的时候才会出发成功，一旦有一个promise对象失败则立即出发该promise的失败
+  - allSettled：等到所有promise都已敲定，返回一个promise，该promise在所有promise完成后完成，并带有一个对象数组，每个对象对应每个promise的结果
+  - any：接收一个promise对象的集合，当其中的一个promise成功，就返回那个成功的promise的值
+  - race：当参数里的任意一个子promise被成功或失败后，父promise马上也会用子promise的成功返回值或失败详情作为参数调用父promise绑定的相应句柄，并返回该promise对象。
+  - reject：返回一个状态为失败的promise对象，并将给定的失败信息传递给对应的处理方法
+  - resolve：返回一个状态由给定value决定的promise对象。如果该值是thenable(即，带有then方法的对象)，返回的promise对象的最终状态由then方法执行决定，否则的话(该value为空，基本类型或不带then方法的对象)，返回的promise对象状态为fulfilled，并且将该value传递给对应的then方法。通常而言，如果你不知道一个值是否为promise对象，使用promise.resolve(value)来返回一个promise对象，这样就能将该value以promise对象形式使用
